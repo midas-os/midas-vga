@@ -1,9 +1,14 @@
 [package]
-name = "midas-vga"
+name = "midas_vga"
 authors = ["MidAS Team"]
 version = "0.1.0"
 edition = "2018"
-license-file = "LICENSE.txt"
+license-file = "LICENSE"
+description = "VGA driver for the MidAS Operating System"
+homepage = "https://midas-os.github.io/MidAS"
+repository = "https://github.com/midas-os/midas-vga"
+readme = "README.md"
+documentation = "https://github.com/midas-os/midas-vga/wiki"
 
 [dependencies]
 vga = "0.2.7"
