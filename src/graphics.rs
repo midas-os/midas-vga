@@ -57,11 +57,85 @@ pub fn draw_centered_rect(size: Point<isize>, color: Color16) {
     draw_rect((x, y), size, color);
 }
 
-pub fn calculate_centered_rect(size: Point<isize>) -> Point<isize> {
-    let x = (640 - size.0) / 2;
-    let y = (480 - size.1) / 2;
+pub fn draw_rect_filled(position: Point<isize>, size: Point<isize>, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
 
-    (x, y)
+    for x in position.0..position.0 + size.0 {
+        for y in position.1..position.1 + size.1 {
+            mode.set_pixel(x as usize, y as usize, color);
+        }
+    }
+}
+
+pub fn draw_circle(position: Point<isize>, radius: isize, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    let mut x = radius - 1;
+    let mut y = 0;
+    let mut dx = 1;
+    let mut dy = 1;
+    let mut err = dx - (radius << 1);
+
+    while x >= y {
+        mode.set_pixel((position.0 + x) as usize, (position.1 + y) as usize, color);
+        mode.set_pixel((position.0 + y) as usize, (position.1 + x) as usize, color);
+        mode.set_pixel((position.0 - y) as usize, (position.1 + x) as usize, color);
+        mode.set_pixel((position.0 - x) as usize, (position.1 + y) as usize, color);
+        mode.set_pixel((position.0 - x) as usize, (position.1 - y) as usize, color);
+        mode.set_pixel((position.0 - y) as usize, (position.1 - x) as usize, color);
+        mode.set_pixel((position.0 + y) as usize, (position.1 - x) as usize, color);
+        mode.set_pixel((position.0 + x) as usize, (position.1 - y) as usize, color);
+
+        if err <= 0 {
+            y += 1;
+            err += dy;
+            dy += 2;
+        }
+
+        if err > 0 {
+            x -= 1;
+            dx += 2;
+            err += dx - (radius << 1);
+        }
+    }
+}
+
+pub fn draw_circle_filled(position: Point<isize>, radius: isize, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    let mut x = radius - 1;
+    let mut y = 0;
+    let mut dx = 1;
+    let mut dy = 1;
+    let mut err = dx - (radius << 1);
+
+    while x >= y {
+        for i in 0..x {
+            mode.set_pixel((position.0 + i) as usize, (position.1 + y) as usize, color);
+            mode.set_pixel((position.0 + y) as usize, (position.1 + i) as usize, color);
+            mode.set_pixel((position.0 - y) as usize, (position.1 + i) as usize, color);
+            mode.set_pixel((position.0 - i) as usize, (position.1 + y) as usize, color);
+            mode.set_pixel((position.0 - i) as usize, (position.1 - y) as usize, color);
+            mode.set_pixel((position.0 - y) as usize, (position.1 - i) as usize, color);
+            mode.set_pixel((position.0 + y) as usize, (position.1 - i) as usize, color);
+            mode.set_pixel((position.0 + i) as usize, (position.1 - y) as usize, color);
+        }
+
+        if err <= 0 {
+            y += 1;
+            err += dy;
+            dy += 2;
+        }
+
+        if err > 0 {
+            x -= 1;
+            dx += 2;
+            err += dx - (radius << 1);
+        }
+    }
 }
 
 pub fn write_str_centered(bounds_start: Point<usize>, bounds_end: Point<usize>, string: &str, color: Color16) {
