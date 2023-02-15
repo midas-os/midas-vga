@@ -1,0 +1,9 @@
+[package]
+name = "midas-vga"
+authors = ["MidAS Team"]
+version = "0.1.0"
+edition = "2018"
+license-file = "LICENSE.txt"
+
+[dependencies]
+vga = "0.2.7"
