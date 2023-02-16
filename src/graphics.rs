@@ -102,45 +102,7 @@ fn draw_line(line: &Line, color: Color16) {
     let mode = Graphics640x480x16::new();
     mode.set_mode();
 
-    // Draw line
-    let mut x = line.start.0;
-    let mut y = line.start.1;
-    let mut dx = line.end.0 - line.start.0;
-    let mut dy = line.end.1 - line.start.1;
-    let mut sx = 1;
-    let mut sy = 1;
-
-    if dx < 0 {
-        dx = -dx;
-        sx = -1;
-    }
-
-    if dy < 0 {
-        dy = -dy;
-        sy = -1;
-    }
-
-    let mut err = dx - dy;
-
-    loop {
-        draw_pixel((x, y), color);
-
-        if x == line.end.0 && y == line.end.1 {
-            break;
-        }
-
-        let e2 = 2 * err;
-
-        if e2 > -dy {
-            err -= dy;
-            x += sx;
-        }
-
-        if e2 < dx {
-            err += dx;
-            y += sy;
-        }
-    }
+    mode.draw_line(line.start, line.end, color);
 }
 
 fn draw_triangle(triangle: &Triangle, color: Color16) {
@@ -152,10 +114,10 @@ fn draw_triangle(triangle: &Triangle, color: Color16) {
     let b_line = Line::new(triangle.b, triangle.c);
     let c_line = Line::new(triangle.c, triangle.a);
 
-    // Draw lines
-    draw_line(&a_line, color);
-    draw_line(&b_line, color);
-    draw_line(&c_line, color);
+    // Draw lines using mode.draw_line
+    mode.draw_line(a_line.start, a_line.end, color);
+    mode.draw_line(b_line.start, b_line.end, color);
+    mode.draw_line(c_line.start, c_line.end, color);
 }
 
 fn draw_circle(circle: &Circle, color: Color16) {
@@ -199,11 +161,11 @@ fn draw_rectangle(rectangle: &Rectangle, color: Color16) {
     let left_line = Line::new(rectangle.start, (rectangle.start.0, rectangle.end.1));
     let right_line = Line::new((rectangle.end.0, rectangle.start.1), rectangle.end);
 
-    // Draw lines
-    draw_line(&top_line, color);
-    draw_line(&bottom_line, color);
-    draw_line(&left_line, color);
-    draw_line(&right_line, color);
+    // Draw lines using mode.draw_line
+    mode.draw_line(top_line.start, top_line.end, color);
+    mode.draw_line(bottom_line.start, bottom_line.end, color);
+    mode.draw_line(left_line.start, left_line.end, color);
+    mode.draw_line(right_line.start, right_line.end, color);
 }
 
 pub fn write_string(start: Point<usize>, string: &str, color: Color16) {
