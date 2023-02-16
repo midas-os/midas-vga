@@ -102,7 +102,45 @@ fn draw_line(line: &Line, color: Color16) {
     let mode = Graphics640x480x16::new();
     mode.set_mode();
 
-    mode.draw_line(line.start, line.end, color);
+    // Draw line
+    let mut x = line.start.0;
+    let mut y = line.start.1;
+    let mut dx = line.end.0 - line.start.0;
+    let mut dy = line.end.1 - line.start.1;
+    let mut sx = 1;
+    let mut sy = 1;
+
+    if dx < 0 {
+        dx = -dx;
+        sx = -1;
+    }
+
+    if dy < 0 {
+        dy = -dy;
+        sy = -1;
+    }
+
+    let mut err = dx - dy;
+
+    loop {
+        draw_pixel((x, y), color);
+
+        if x == line.end.0 && y == line.end.1 {
+            break;
+        }
+
+        let e2 = 2 * err;
+
+        if e2 > -dy {
+            err -= dy;
+            x += sx;
+        }
+
+        if e2 < dx {
+            err += dx;
+            y += sy;
+        }
+    }
 }
 
 fn draw_triangle(triangle: &Triangle, color: Color16) {
