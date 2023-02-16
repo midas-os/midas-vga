@@ -2,6 +2,8 @@ use vga::writers::{Graphics640x480x16, GraphicsWriter};
 use vga::drawing::Point;
 use vga::colors::Color16;
 
+use crate::shapes::{Shape, Line, Triangle, Circle, Rectangle};
+
 pub fn init() {
     let mode = Graphics640x480x16::new();
     mode.set_mode();
@@ -23,14 +25,147 @@ pub fn draw_pixel(position: Point<isize>, color: Color16) {
     mode.set_pixel(position.0 as usize, position.1 as usize, color);
 }
 
-pub fn draw_rect(position: Point<isize>, size: Point<isize>, color: Color16) {
+// shapes
+pub fn draw_shape(shape: &Shape, color: Color16) {
+    match shape {
+        Shape::Rectangle(rectangle) => draw_rectangle(rectangle, color),
+        Shape::Circle(circle) => draw_circle(circle, color),
+        Shape::Triangle(triangle) => draw_triangle(triangle, color),
+        Shape::Line(line) => draw_line(line, color),
+    }
+}
+
+pub fn draw_shape_filled(shape: &Shape, color: Color16) {
+    match shape {
+        Shape::Rectangle(rectangle) => draw_rectangle_filled(rectangle, color),
+        Shape::Circle(circle) => draw_circle_filled(circle, color),
+        Shape::Triangle(triangle) => draw_triangle_filled(triangle, color),
+        Shape::Line(line) => draw_line(line, color),
+    }
+}
+
+fn draw_triangle_filled(triangle: &Triangle, color: Color16) {
     let mode = Graphics640x480x16::new();
     mode.set_mode();
 
-    mode.draw_line((position.0, position.1), (position.0, position.1 + size.1), color);
-    mode.draw_line((position.0, position.1), (position.0 + size.0, position.1), color);
-    mode.draw_line((position.0 + size.0, position.1), (position.0 + size.0, position.1 + size.1), color);
-    mode.draw_line((position.0, position.1 + size.1), (position.0 + size.0, position.1 + size.1), color);
+    // Draw lines
+    for x in triangle.a.0..triangle.b.0 {
+        for y in triangle.a.1..triangle.c.1 {
+            draw_pixel((x, y), color);
+        }
+    }
+}
+
+fn draw_circle_filled(circle: &Circle, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    // Bresenham's circle algorithm
+    let mut x = circle.radius as isize;
+    let mut y = 0;
+    let mut err = 0;
+
+    while x >= y {
+        // Draw lines
+        for i in circle.center.0 - x..circle.center.0 + x {
+            draw_pixel((i, circle.center.1 + y), color);
+            draw_pixel((i, circle.center.1 - y), color);
+        }
+
+        for i in circle.center.0 - y..circle.center.0 + y {
+            draw_pixel((i, circle.center.1 + x), color);
+            draw_pixel((i, circle.center.1 - x), color);
+        }
+
+        y += 1;
+        err += 1 + 2 * y;
+        if 2 * (err - x) + 1 > 0 {
+            x -= 1;
+            err += 1 - 2 * x;
+        }
+    }
+}
+
+fn draw_rectangle_filled(rectangle: &Rectangle, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    // Draw lines
+    for x in rectangle.start.0..rectangle.end.0 {
+        for y in rectangle.start.1..rectangle.end.1 {
+            draw_pixel((x, y), color);
+        }
+    }
+}
+
+fn draw_line(line: &Line, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    mode.draw_line(line.start, line.end, color);
+}
+
+fn draw_triangle(triangle: &Triangle, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    // Split into lines
+    let a_line = Line::new(triangle.a, triangle.b);
+    let b_line = Line::new(triangle.b, triangle.c);
+    let c_line = Line::new(triangle.c, triangle.a);
+
+    // Draw lines
+    draw_line(&a_line, color);
+    draw_line(&b_line, color);
+    draw_line(&c_line, color);
+}
+
+fn draw_circle(circle: &Circle, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    // Bresenham's circle algorithm
+    let mut x = circle.radius as isize;
+    let mut y = 0;
+    let mut err = 0;
+
+    while x >= y {
+        draw_pixel((circle.center.0 + x, circle.center.1 + y), color);
+        draw_pixel((circle.center.0 + y, circle.center.1 + x), color);
+        draw_pixel((circle.center.0 - y, circle.center.1 + x), color);
+        draw_pixel((circle.center.0 - x, circle.center.1 + y), color);
+        draw_pixel((circle.center.0 - x, circle.center.1 - y), color);
+        draw_pixel((circle.center.0 - y, circle.center.1 - x), color);
+        draw_pixel((circle.center.0 + y, circle.center.1 - x), color);
+        draw_pixel((circle.center.0 + x, circle.center.1 - y), color);
+
+        if err <= 0 {
+            y += 1;
+            err += 2 * y + 1;
+        }
+
+        if err > 0 {
+            x -= 1;
+            err -= 2 * x + 1;
+        }
+    }
+}
+
+fn draw_rectangle(rectangle: &Rectangle, color: Color16) {
+    let mode = Graphics640x480x16::new();
+    mode.set_mode();
+
+    // Split into lines
+    let top_line = Line::new(rectangle.start, (rectangle.end.0, rectangle.start.1));
+    let bottom_line = Line::new((rectangle.start.0, rectangle.end.1), rectangle.end);
+    let left_line = Line::new(rectangle.start, (rectangle.start.0, rectangle.end.1));
+    let right_line = Line::new((rectangle.end.0, rectangle.start.1), rectangle.end);
+
+    // Draw lines
+    draw_line(&top_line, color);
+    draw_line(&bottom_line, color);
+    draw_line(&left_line, color);
+    draw_line(&right_line, color);
 }
 
 pub fn write_string(start: Point<usize>, string: &str, color: Color16) {
@@ -38,7 +173,7 @@ pub fn write_string(start: Point<usize>, string: &str, color: Color16) {
     let mut y_offset = 0;
     let mut x_offset = 0;
 
-    for (offset, character) in string.chars().enumerate() {
+    for (_offset, character) in string.chars().enumerate() {
         if character == '\n' {
             x_offset = 0;
             y_offset += 1;
@@ -47,94 +182,6 @@ pub fn write_string(start: Point<usize>, string: &str, color: Color16) {
 
         x_offset += 1;
         mode.draw_character(start.0 + x_offset * 8, start.1 + (y_offset * 10), character, color);
-    }
-}
-
-pub fn draw_centered_rect(size: Point<isize>, color: Color16) {
-    let x = (640 - size.0) / 2;
-    let y = (480 - size.1) / 2;
-
-    draw_rect((x, y), size, color);
-}
-
-pub fn draw_rect_filled(position: Point<isize>, size: Point<isize>, color: Color16) {
-    let mode = Graphics640x480x16::new();
-    mode.set_mode();
-
-    for x in position.0..position.0 + size.0 {
-        for y in position.1..position.1 + size.1 {
-            mode.set_pixel(x as usize, y as usize, color);
-        }
-    }
-}
-
-pub fn draw_circle(position: Point<isize>, radius: isize, color: Color16) {
-    let mode = Graphics640x480x16::new();
-    mode.set_mode();
-
-    let mut x = radius - 1;
-    let mut y = 0;
-    let mut dx = 1;
-    let mut dy = 1;
-    let mut err = dx - (radius << 1);
-
-    while x >= y {
-        mode.set_pixel((position.0 + x) as usize, (position.1 + y) as usize, color);
-        mode.set_pixel((position.0 + y) as usize, (position.1 + x) as usize, color);
-        mode.set_pixel((position.0 - y) as usize, (position.1 + x) as usize, color);
-        mode.set_pixel((position.0 - x) as usize, (position.1 + y) as usize, color);
-        mode.set_pixel((position.0 - x) as usize, (position.1 - y) as usize, color);
-        mode.set_pixel((position.0 - y) as usize, (position.1 - x) as usize, color);
-        mode.set_pixel((position.0 + y) as usize, (position.1 - x) as usize, color);
-        mode.set_pixel((position.0 + x) as usize, (position.1 - y) as usize, color);
-
-        if err <= 0 {
-            y += 1;
-            err += dy;
-            dy += 2;
-        }
-
-        if err > 0 {
-            x -= 1;
-            dx += 2;
-            err += dx - (radius << 1);
-        }
-    }
-}
-
-pub fn draw_circle_filled(position: Point<isize>, radius: isize, color: Color16) {
-    let mode = Graphics640x480x16::new();
-    mode.set_mode();
-
-    let mut x = radius - 1;
-    let mut y = 0;
-    let mut dx = 1;
-    let mut dy = 1;
-    let mut err = dx - (radius << 1);
-
-    while x >= y {
-        for i in 0..x {
-            mode.set_pixel((position.0 + i) as usize, (position.1 + y) as usize, color);
-            mode.set_pixel((position.0 + y) as usize, (position.1 + i) as usize, color);
-            mode.set_pixel((position.0 - y) as usize, (position.1 + i) as usize, color);
-            mode.set_pixel((position.0 - i) as usize, (position.1 + y) as usize, color);
-            mode.set_pixel((position.0 - i) as usize, (position.1 - y) as usize, color);
-            mode.set_pixel((position.0 - y) as usize, (position.1 - i) as usize, color);
-            mode.set_pixel((position.0 + y) as usize, (position.1 - i) as usize, color);
-            mode.set_pixel((position.0 + i) as usize, (position.1 - y) as usize, color);
-        }
-
-        if err <= 0 {
-            y += 1;
-            err += dy;
-            dy += 2;
-        }
-
-        if err > 0 {
-            x -= 1;
-            dx += 2;
-            err += dx - (radius << 1);
-        }
     }
 }
 

@@ -31,7 +31,7 @@ pub fn write_string_centered(string: &str, y: usize, color: TextModeColor) {
     let lines = string.lines().count();
     let y = y - (lines / 2);
 
-    for (i, line) in string.lines().enumerate() {
+    for (_i, _line) in string.lines().enumerate() {
         let x = (SIZE.0 / 2) - (string.len() / 2);
         write_string(string, x, y, color);
     }

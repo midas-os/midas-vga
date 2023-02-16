@@ -21,7 +21,7 @@ pub fn calculate_rect_size(start: Point<isize>, end: Point<isize>) -> Point<isiz
     (x, y)
 }
 
-pub fn calculate_rect_center(start: Point<isize>, end: Point<isize>) -> Point<isize> {
+pub fn calculate_center(start: Point<isize>, end: Point<isize>) -> Point<isize> {
     let x = (start.0 + end.0) / 2;
     let y = (start.1 + end.1) / 2;
 
