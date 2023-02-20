@@ -19,8 +19,16 @@ pub fn write_string(string: &str, x: usize, y: usize, color: TextModeColor) {
     let mode = Text80x25::new();
     mode.set_mode();
 
+    let mut y_offset = 0;
+
     for (i, character) in string.chars().enumerate() {
-        write_char(ScreenCharacter::new(character as u8, color), x + i, y);
+        // check if character is newline
+        if character == '\n' {
+            y_offset += 1;
+            continue;
+        }
+
+        write_char(ScreenCharacter::new(character as u8, color), x + i, y + y_offset);
     }
 }
 
