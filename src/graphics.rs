@@ -1,13 +1,13 @@
-use vga::writers::{Graphics640x480x16, GraphicsWriter};
+use vga::writers::{GraphicsWriter, Graphics320x240x256};
 use vga::drawing::Point;
 use vga::colors::Color16;
 
 use crate::shapes::{Shape, Line, Triangle, Circle, Rectangle};
 
 pub fn init() {
-    let mode = Graphics640x480x16::new();
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
-    mode.clear_screen(Color16::Black);
+    mode.clear_screen(0x0);
 }
 
 pub fn to_usize(point: Point<isize>) -> Point<usize> {
@@ -18,15 +18,22 @@ pub fn to_isize(point: Point<usize>) -> Point<isize> {
     (point.0 as isize, point.1 as isize)
 }
 
-pub fn draw_pixel(position: Point<isize>, color: Color16) {
-    let mode = Graphics640x480x16::new();
+pub fn draw_pixel(position: Point<isize>, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     mode.set_pixel(position.0 as usize, position.1 as usize, color);
 }
 
+pub fn color_palette_load() {
+    let mode = Graphics320x240x256::new();
+    mode.set_mode();
+
+    mode.draw_line((0, 0), (200, 200), 0xFA);
+}
+
 // shapes
-pub fn draw_shape(shape: &Shape, color: Color16) {
+pub fn draw_shape(shape: &Shape, color: u8) {
     match shape {
         Shape::Rectangle(rectangle) => draw_rectangle(rectangle, color),
         Shape::Circle(circle) => draw_circle(circle, color),
@@ -35,7 +42,7 @@ pub fn draw_shape(shape: &Shape, color: Color16) {
     }
 }
 
-pub fn draw_shape_filled(shape: &Shape, color: Color16) {
+pub fn draw_shape_filled(shape: &Shape, color: u8) {
     match shape {
         Shape::Rectangle(rectangle) => draw_rectangle_filled(rectangle, color),
         Shape::Circle(circle) => draw_circle_filled(circle, color),
@@ -44,8 +51,8 @@ pub fn draw_shape_filled(shape: &Shape, color: Color16) {
     }
 }
 
-fn draw_triangle_filled(triangle: &Triangle, color: Color16) {
-    let mode = Graphics640x480x16::new();
+fn draw_triangle_filled(triangle: &Triangle, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     // Draw lines
@@ -56,8 +63,8 @@ fn draw_triangle_filled(triangle: &Triangle, color: Color16) {
     }
 }
 
-fn draw_circle_filled(circle: &Circle, color: Color16) {
-    let mode = Graphics640x480x16::new();
+fn draw_circle_filled(circle: &Circle, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     // Bresenham's circle algorithm
@@ -86,8 +93,8 @@ fn draw_circle_filled(circle: &Circle, color: Color16) {
     }
 }
 
-fn draw_rectangle_filled(rectangle: &Rectangle, color: Color16) {
-    let mode = Graphics640x480x16::new();
+fn draw_rectangle_filled(rectangle: &Rectangle, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     // Draw lines
@@ -98,15 +105,15 @@ fn draw_rectangle_filled(rectangle: &Rectangle, color: Color16) {
     }
 }
 
-fn draw_line(line: &Line, color: Color16) {
-    let mode = Graphics640x480x16::new();
+fn draw_line(line: &Line, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     mode.draw_line(line.start, line.end, color);
 }
 
-fn draw_triangle(triangle: &Triangle, color: Color16) {
-    let mode = Graphics640x480x16::new();
+fn draw_triangle(triangle: &Triangle, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     // Split into lines
@@ -120,8 +127,8 @@ fn draw_triangle(triangle: &Triangle, color: Color16) {
     mode.draw_line(c_line.start, c_line.end, color);
 }
 
-fn draw_circle(circle: &Circle, color: Color16) {
-    let mode = Graphics640x480x16::new();
+fn draw_circle(circle: &Circle, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     // Bresenham's circle algorithm
@@ -151,8 +158,8 @@ fn draw_circle(circle: &Circle, color: Color16) {
     }
 }
 
-fn draw_rectangle(rectangle: &Rectangle, color: Color16) {
-    let mode = Graphics640x480x16::new();
+fn draw_rectangle(rectangle: &Rectangle, color: u8) {
+    let mode = Graphics320x240x256::new();
     mode.set_mode();
 
     // Split into lines
@@ -168,8 +175,8 @@ fn draw_rectangle(rectangle: &Rectangle, color: Color16) {
     mode.draw_line(right_line.start, right_line.end, color);
 }
 
-pub fn write_string(start: Point<usize>, string: &str, color: Color16) {
-    let mode = Graphics640x480x16::new();
+pub fn write_string(start: Point<usize>, string: &str, color: u8) {
+    let mode = Graphics320x240x256::new();
     let mut y_offset = 0;
     let mut x_offset = 0;
 
@@ -185,7 +192,7 @@ pub fn write_string(start: Point<usize>, string: &str, color: Color16) {
     }
 }
 
-pub fn write_str_centered(bounds_start: Point<usize>, bounds_end: Point<usize>, string: &str, color: Color16) {
+pub fn write_str_centered(bounds_start: Point<usize>, bounds_end: Point<usize>, string: &str, color: u8) {
     let lines = string.split('\n');
 
     for (offset, line) in lines.enumerate() {
@@ -199,7 +206,7 @@ pub fn write_str_centered(bounds_start: Point<usize>, bounds_end: Point<usize>, 
     }
 }
 
-pub fn write_str_centered_x(bounds_start: Point<usize>, bounds_end: Point<usize>, y: usize, string: &str, color: Color16) {
+pub fn write_str_centered_x(bounds_start: Point<usize>, bounds_end: Point<usize>, y: usize, string: &str, color: u8) {
     // split string into new lines
     let lines = string.split('\n');
 
@@ -212,7 +219,7 @@ pub fn write_str_centered_x(bounds_start: Point<usize>, bounds_end: Point<usize>
     }
 }
 
-pub fn write_str_centered_y(bounds_start: Point<usize>, bounds_end: Point<usize>, x: usize, string: &str, color: Color16) {
+pub fn write_str_centered_y(bounds_start: Point<usize>, bounds_end: Point<usize>, x: usize, string: &str, color: u8) {
     let string_height = 16;
 
     let y = (bounds_start.1 + bounds_end.1) / 2 - string_height / 2;
