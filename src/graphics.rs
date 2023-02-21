@@ -1,6 +1,5 @@
 use vga::writers::{GraphicsWriter, Graphics320x240x256};
 use vga::drawing::Point;
-use vga::colors::Color16;
 
 use crate::shapes::{Shape, Line, Triangle, Circle, Rectangle};
 

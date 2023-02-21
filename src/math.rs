@@ -1,8 +1,10 @@
 use vga::drawing::Point;
+use crate::size::*;
 
 pub fn calculate_centered_rect(size: Point<isize>) -> Point<isize> {
-    let x = (640 - size.0) / 2;
-    let y = (480 - size.1) / 2;
+    let buffer_size = get_size();
+    let x = (buffer_size.0 - size.0) / 2;
+    let y = (buffer_size.1 - size.1) / 2;
 
     (x, y)
 }
